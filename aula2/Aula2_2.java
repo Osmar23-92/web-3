@@ -14,9 +14,10 @@ public class aula2_2 {
 
 	  float result = (n1 + n2) / 2;
 
-	   (result >= 120 ) {
+	  if (result >= 120 ) {
 	    System.out.println("Passou");
-	    } else {System.out.println("Rodou...");
+	    } else {
+		System.out.println("Rodou...");
 }
   }
 }
