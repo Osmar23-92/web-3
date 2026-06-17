@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+    <head>
+        <title> AULA4 - HTML E CSS </title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="icon" href="img/cri.png"/>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bitcount+Single:wght@100..900&display=swap" rel="stylesheet">
+    
+        <style>
+            main {
+               border: 3px solid black;
+               justify-self: center;
+               text-align: center;
+               padding: 90px 50px;
+               position: fixed;
+               top: 50%;
+               transform: translateY(-50%);
+               color: black;
+               background-color: background;
+               
+            }
+            
+           .entrada {
+                /*background-color: yellowgreen;*/
+                margin: 20px;
+                
+            }
+            
+            label {
+                display: block;
+                text-align: left;
+                margin-bottom: 5px;
+                font-family: "Bitcount Single", system-ui;
+                letter-spacing: 0.6px;
+            }
+            
+            .input {
+                border-radius: 5pt;
+                width: 96%;
+                padding: 5px;
+                font-family: impact, sans-serif;
+                font-size: 14pt;
+                color: darkgreen;
+                letter-spacing: 1px;
+                
+            }
+            
+            #btn {
+                font-family: impact, sans-serif;
+                border-radius: 10pt;
+                width: 85%;
+                cursor: pointer;
+                transition: 0.5s;
+            }
+            
+            #btn:hover {
+              background-color: black;
+              color: white;
+              border-radius: 20px;
+              transition: 0.5s;
+              width: 50%;
+            }
+            
+        </style>
+    </head>
+    <body>
+   
+        <main>
+          <img src="img/usu.gif" alt="logo" width="150"/> 
+        
+          <form action="#" method="get">
+              <div class="entrada"> 
+                 <label for="user">Usuário:</label>
+                 <input type="text" id="user" name="user" class="input">
+             </div>
+                 
+              <div class="entrada">
+                  <label for="pass">Senha:</label>
+                  <input type="password" id="pass" name="pass" class="input">
+             </div>
+              
+              <input type="submit" id="btn" value="Entrar" style="font-size: 20pt;">
+              
+          </form>
+        
+        </main>
+  
+    </body>
+</html>
