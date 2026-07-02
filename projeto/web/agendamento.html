@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Guaipet - Marcar Consulta</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" href="img/guaipet.jpeg"/>
+    <style>
+        /* Estilo auxiliar para destacar qual card foi selecionado */
+        .card.ativo {
+            border-color: #0056b3 !important;
+            background-color: #e7f1ff !important;
+            transform: scale(1.02);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <div>
+                <a href="index.html"><img src="img/guaipet.jpeg" alt="Logo" id="logo"></a>
+            </div>
+            <ul class="nav-links">
+                <li><a href="consultas.html">Minhas Consultas</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <h2 style="margin-bottom: 30px; color: #0056b3;">Marcar Consulta</h2>
+        
+        <section style="margin-bottom: 40px;">
+            <h3>1. Escolha o Paciente (Pet)</h3>
+        </section>
+
+        <section style="margin-bottom: 40px;">
+            <h3>2. Selecione a Área Desejada</h3>
+            <div class="grid-container">
+                <div class="card card-area" data-area="Checkup"><h4>Checkup</h4></div>
+                <div class="card card-area" id="card-vacinacao" data-area="Vacinação" style="cursor: pointer;"><h4>Vacinação</h4></div>
+                <div class="card card-area" data-area="Raio X"><h4>Raio X</h4></div>
+                <div class="card card-area" data-area="Cardiologia"><h4>Cardiologia</h4></div>
+            </div>
+            <p id="vacinas-selecionadas-texto" style="margin-top: 15px; font-weight: bold; color: #28a745;"></p>
+        </section>
+
+        <section style="margin-bottom: 40px;">
+            <h3>3. Escolha a Data e Horário</h3>
+            <div class="form-group" style="max-width: 300px; margin-top: 15px;">
+                <input type="date" id="input-data" name="data_consulta">
+            </div>
+        </section>
+
+        <button class="btn-primary" id="btn-confirmar-agendamento">Confirmar Consulta</button>
+    </main>
+
+    <div id="modal-vacinas" class="modal-container hidden">
+        <div class="modal-conteudo">
+            <span id="fechar-modal-vacinas" class="botao-fechar">&times;</span>
+            <h2 style="color: #0056b3; margin-bottom: 20px;">Escolha as Vacinas</h2>
+
+            <div class="avatar-selection" style="margin-bottom: 25px;">
+                <label style="display: block; margin-bottom: 10px; font-weight: bold; color: #555;">Selecione uma ou mais opções:</label>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 12px; justify-items: center; max-height: 200px; overflow-y: auto; padding: 5px;">
+                    <div class="vacina-opcao" data-vacina="V10 / V8 (Cães)" style="padding: 10px; border: 2px solid #ccc; border-radius: 10px; text-align: center; cursor: pointer; width: 100%;">Gripe / V10</div>
+                    <div class="vacina-opcao" data-vacina="Antirrábica" style="padding: 10px; border: 2px solid #ccc; border-radius: 10px; text-align: center; cursor: pointer; width: 100%;">Antirrábica</div>
+                    <div class="vacina-opcao" data-vacina="Quádrupla Felina" style="padding: 10px; border: 2px solid #ccc; border-radius: 10px; text-align: center; cursor: pointer; width: 100%;">Quádrupla (Gatos)</div>
+                    <div class="vacina-opcao" data-vacina="Leishmaniose" style="padding: 10px; border: 2px solid #ccc; border-radius: 10px; text-align: center; cursor: pointer; width: 100%;">Leishmaniose</div>
+                </div>
+            </div>
+            <button type="button" id="btn-confirmar-vacinas" class="btn-primary">Confirmar Seleção</button>
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const cardsArea = document.querySelectorAll(".card-area");
+        const cardVacinacao = document.getElementById("card-vacinacao");
+        const modalVacinas = document.getElementById("modal-vacinas");
+        const btnFecharModal = document.getElementById("fechar-modal-vacinas");
+        const btnConfirmarVacinas = document.getElementById("btn-confirmar-vacinas");
+        const opcoesVacina = document.querySelectorAll(".vacina-opcao");
+        const textoSelecionadas = document.getElementById("vacinas-selecionadas-texto");
+        const inputData = document.getElementById("input-data");
+        const btnConfirmarAgendamento = document.getElementById("btn-confirmar-agendamento");
+
+        let areasSelecionadas = []; 
+        let vacinasSelecionadas = [];
+
+        // 1. Permite selecionar múltiplos Cards de Área sem desmarcar
+        cardsArea.forEach(card => {
+            card.addEventListener("click", () => {
+                const area = card.getAttribute("data-area");
+
+                if (card.classList.contains("ativo")) {
+                    card.classList.remove("ativo");
+                    areasSelecionadas = areasSelecionadas.filter(a => a !== area);
+
+                    if (area === "Vacinação") {
+                        vacinasSelecionadas = [];
+                        textoSelecionadas.textContent = "";
+                        opcoesVacina.forEach(opcao => {
+                            opcao.classList.remove("selecionado");
+                            opcao.style.borderColor = "#ccc";
+                            opcao.style.background = "none";
+                        });
+                    }
+                } else {
+                    card.classList.add("ativo");
+                    areasSelecionadas.push(area);
+
+                    if (area === "Vacinação") {
+                        modalVacinas.classList.remove("hidden");
+                    }
+                }
+            });
+        });
+
+        // 2. Fechar o modal de vacinas
+        btnFecharModal.addEventListener("click", () => modalVacinas.classList.add("hidden"));
+        modalVacinas.addEventListener("click", (e) => { if (e.target === modalVacinas) modalVacinas.classList.add("hidden"); });
+
+        // 3. Seleção das vacinas dentro do modal
+        opcoesVacina.forEach(opcao => {
+            opcao.addEventListener("click", () => {
+                const nomeVacina = opcao.getAttribute("data-vacina");
+                if (opcao.classList.contains("selecionado")) {
+                    opcao.classList.remove("selecionado");
+                    opcao.style.borderColor = "#ccc";
+                    opcao.style.background = "none";
+                    vacinasSelecionadas = vacinasSelecionadas.filter(v => v !== nomeVacina);
+                } else {
+                    opcao.classList.add("selecionado");
+                    opcao.style.borderColor = "#0056b3";
+                    opcao.style.background = "#e7f1ff";
+                    vacinasSelecionadas.push(nomeVacina);
+                }
+            });
+        });
+
+        // Confirmar vacinas dentro do modal
+        btnConfirmarVacinas.addEventListener("click", () => {
+            modalVacinas.classList.add("hidden");
+            if (vacinasSelecionadas.length > 0) {
+                textoSelecionadas.textContent = "Vacinas: " + vacinasSelecionadas.join(", ");
+            }
+        });
+
+        // 4. Salva a consulta atual na lista geral sem sobrescrever histórico
+        btnConfirmarAgendamento.addEventListener("click", () => {
+            const dataEscolhida = inputData.value;
+
+            if (areasSelecionadas.length === 0) {
+                alert("Por favor, selecione ao menos uma área (Checkup, Vacinação, etc.) antes de continuar.");
+                return;
+            }
+            if (areasSelecionadas.includes("Vacinação") && vacinasSelecionadas.length === 0) {
+                alert("Você escolheu Vacinação, por favor abra o card e selecione ao menos uma vacina.");
+                modalVacinas.classList.remove("hidden");
+                return;
+            }
+            if (!dataEscolhida) {
+                alert("Por favor, escolha uma data para a consulta.");
+                return;
+            }
+            
+            // Criamos o objeto estruturado com ID exclusivo
+            const novoAgendamento = {
+                id: Date.now(), 
+                area: areasSelecionadas.join(", "),
+                vacinas: vacinasSelecionadas.join(", "),
+                data: dataEscolhida
+            };
+            
+            // Carrega a lista atual do navegador ou inicia uma vazia se for a primeira vez
+            let consultasSalvas = JSON.parse(localStorage.getItem("lista_consultas")) || [];
+
+            // Adiciona o agendamento atual no final da lista antiga
+            consultasSalvas.push(novoAgendamento);
+            
+            // Atualiza de vez o banco local com a lista inteira modificada
+            localStorage.setItem("lista_consultas", JSON.stringify(consultasSalvas));
+
+            // Redireciona o usuário para conferir o histórico
+            window.location.href = "consultas.html";
+        });
+    });
+    </script>
+</body>
+</html>

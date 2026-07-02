@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <title>Guaipet - Minhas Consultas</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" href="img/guaipet.jpeg"/>
+</head>
+<body>
+    <header>
+        <nav>
+            <div>
+                <a href="index.html"><img src="img/guaipet.jpeg" alt="Logo" id="logo"></a>
+            </div>
+            <ul class="nav-links">
+                <li><a href="agendamento.html">Novo Agendamento</a></li>
+            </ul>
+        </nav>
+    </header>         
+        
+    <main style="padding: 40px; max-width: 800px; margin: 0 auto;">
+        <h2 style="color: #0056b3; margin-bottom: 20px;">Minhas Consultas Agendadas</h2>
+        
+        <div id="sem-consultas" class="card" style="text-align: center; padding: 20px;">
+            <p>Você ainda não possui nenhuma consulta ou procedimento agendado.</p>
+        </div>
+
+        <div id="lista-consultas" style="display: flex; flex-direction: column; gap: 15px;"></div>
+    </main>
+
+    <script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const blocoSemConsultas = document.getElementById("sem-consultas");
+        const listaConsultas = document.getElementById("lista-consultas");
+
+        // 1. Puxa a lista completa de consultas do localStorage
+        let consultasSalvas = JSON.parse(localStorage.getItem("lista_consultas")) || [];
+
+        // 2. Se a lista não estiver vazia, renderiza os cards
+        if (consultasSalvas.length > 0) {
+            // Esconde o aviso de "sem consultas"
+            blocoSemConsultas.style.display = "none";
+            listaConsultas.innerHTML = ""; // Limpa o container por segurança
+
+            // Percorre cada consulta salva e cria o HTML dela
+            consultasSalvas.forEach(consulta => {
+                const dataFormatada = consulta.data.split("-").reverse().join("/");
+                
+                let servicoExibido = consulta.area;
+                if (consulta.area.includes("Vacinação") && consulta.vacinas) {
+                    // Ajusta o texto caso misture vacina com outras áreas
+                    servicoExibido = servicoExibido.replace("Vacinação", `Vacinação (${consulta.vacinas})`);
+                }
+
+                const cardConsulta = document.createElement("div");
+                cardConsulta.className = "card";
+                cardConsulta.style.borderLeft = "6px solid #0056b3";
+                cardConsulta.style.padding = "20px";
+                cardConsulta.style.background = "#fff";
+                cardConsulta.style.marginBottom = "15px";
+                
+                cardConsulta.innerHTML = `
+                    <h3 style="color: #0056b3; margin-top: 0;">Procedimento: ${servicoExibido}</h3>
+                    <p><strong>Data:</strong> ${dataFormatada}</p>
+                    <p><strong>Status:</strong> <span style="color: #28a745; font-weight: bold;">Confirmado</span></p>
+                    <button class="btn-cancelar" data-id="${consulta.id}" style="background: #dc3545; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; margin-top: 10px;">
+                        Cancelar Agendamento
+                    </button>
+                `;
+
+                listaConsultas.appendChild(cardConsulta);
+            });
+
+            // 3. Lógica para deletar apenas a consulta que foi clicada
+            const botoesCancelar = document.querySelectorAll(".btn-cancelar");
+            botoesCancelar.forEach(botao => {
+                botao.addEventListener("click", () => {
+                    if (confirm("Deseja mesmo cancelar esta consulta?")) {
+                        const idParaDeletar = Number(botao.getAttribute("data-id"));
+                        
+                        // Filtra a lista removendo apenas o item com o ID clicado
+                        consultasSalvas = consultasSalvas.filter(c => c.id !== idParaDeletar);
+                        
+                        // Atualiza o localStorage com a nova lista reduzida
+                        localStorage.setItem("lista_consultas", JSON.stringify(consultasSalvas));
+                        
+                        // Recarrega a página para atualizar o visual
+                        window.location.reload();
+                    }
+                });
+            });
+
+        } else {
+            // Se a lista estiver vazia, garante que o aviso aparece
+            blocoSemConsultas.style.display = "block";
+        }
+    });
+    </script>
+</body>
+</html>

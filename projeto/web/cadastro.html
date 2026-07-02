@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Guaipet - Cadastro</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" href="img/guaipet.jpeg"/>
+</head>
+<body>
+    <header>
+        <nav>
+            <div>
+                <a href="index.html"><img src="img/guaipet.jpeg" alt="Logo" id="logo"></a>
+            </div>
+            <ul class="nav-links">
+                
+                
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <div class="cadastro-layout">
+
+            <div class="form-container" style="flex: 2; min-width: 350px;">
+                <h2 style="margin-bottom: 20px; color: #0056b3;">Cadastro do Tutor</h2>
+                <form action="CadastroServlet" method="post">
+                    <div class="form-group">
+                        <label>Nome Completo</label>
+                        <input type="text" name="nome" placeholder="Digite seu nome" required>
+                    </div>
+                    <div class="form-group">
+                        <label>CPF</label>
+                        <input type="text" name="cpf" placeholder="000.000.000-00" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" name="email" placeholder="seuemail@gmail.com" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Telefone</label>
+                        <input type="tel" name="telefone" placeholder="(99) 99999 9999" required>
+                    </div>
+                    
+                    
+                    <h3 style="margin: 20px 0 10px 0; color: #555;">Endereço</h3>
+                    <div style="display: flex; gap: 10px;">
+                        <div class="form-group" style="flex: 2;">
+                            <label>CEP</label>
+                            <input type="text" name="cep" placeholder="00000-000">
+                        </div>
+                        <div class="form-group" style="flex: 1;">
+                            <label>Número</label>
+                            <input type="text" name="numero" placeholder="123">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Rua</label>
+                        <input type="text" name="rua" placeholder="Digite sua rua">
+                    </div>
+
+                    <div style="display: flex; gap: 10px; margin-top: 15px;">
+                        <input type="submit" class="btn-primary" value="CADASTRAR" style="width: auto;">
+                    </div>
+                </form>
+            </div>
+
+            <div class="info-lateral">
+                <h3>Por que se Cadastrar?</h3>
+                <ul style="margin-top: 15px; padding-left: 20px; line-height: 2;">
+                    <li>Agende consultas online de forma rápida.</li>
+                    <li>Acesso rápido e seguro ao histórico médico.</li>
+                    <li>Acompanhe o prontuário do seu pet.</li>
+                    <li>Catálogo completo de remédios e produtos.</li>
+                </ul>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

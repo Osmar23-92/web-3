@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Guaipet - Home</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" href="img/guaipet.jpeg"/>
+</head>
+<body>
+    <header>
+        <nav>
+            <div>
+                <a href="index.html"><img src="img/guaipet.jpeg" alt="Logo Guaipet" id="logo"></a>
+            </div>
+            <ul class="nav-links">
+                <li><a href="#">Serviços</a></li>
+                <li><a href="#">Produtos</a></li>
+                <li><a href="#">Sobre Nós</a></li>
+                <li><a href="cadastro.html" class="btn-entrar" id="btn-entrar">ENTRAR</a></li>
+            </ul>
+            
+            <div id="wrapper-usuario" class="hidden">
+                <div class="user-profile-box" id="usuario-gatilho" style="cursor: pointer;">
+                    <img src="img/cat.png" alt="Usuário" id="usuario">
+                    <span id="nome-usuario-nav">Carregando...</span>
+                </div>
+                
+                <div id="user-dropdown" class="dropdown-content hidden">
+                    <a href="#" id="abrir-perfil">Editar Perfil</a>
+                    <a href="#" id="btn-logout" style="color: #dc3545;">Sair</a>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section style="text-align: center; margin-bottom: 50px; padding: 40px; background: #e7f1ff; border-radius: 15px;">
+            <h1 style="font-size: 36px; color: #0056b3; margin-bottom: 10px;">Bem-vindo à GUAIPET</h1>
+            <p style="font-size: 18px; margin-bottom: 20px;">Cuidado, carinho e saúde para quem você ama!</p>
+            <a href="agendamento.html"><button class="btn-primary">Agendar Consulta</button></a>
+        </section>
+
+        <section>
+            <h2>O que você procura hoje?</h2>
+            <div class="grid-container">
+                <div class="card" onclick="location.href='agendamento.html'">
+                    <h3>Agendar Consultas</h3>
+                </div>
+                <div class="card" onclick="location.href='consultas.html'">
+                    <h3>Minhas Consultas</h3>
+                </div>
+                <div class="card">
+                    <h3>Perfil dos Meus Pets</h3>
+                </div>
+                <div class="card">
+                    <h3>Nossos Produtos</h3>
+                </div>
+                <div class="card">
+                    <h3>Medicamentos</h3>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        &copy; 2026 Guaipet - Todos os direitos reservados.
+    </footer>
+    
+    <div id="modal-perfil" class="modal-container hidden">
+        <div class="modal-conteudo">
+            <span id="fechar-modal" class="botao-fechar">&times;</span>
+
+            <h2 style="color: #0056b3; margin-bottom: 20px;">Editar Perfil do Tutor</h2>
+
+            <div class="avatar-selection" style="margin-bottom: 25px;">
+                <label style="display: block; margin-bottom: 10px; font-weight: bold; color: #555;">Escolha sua foto de perfil:</label>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(60px, 1fr)); gap: 12px; justify-items: center; max-height: 150px; overflow-y: auto; padding: 5px;">
+                    <img src="img/cat.png" class="avatar-opcao selecionado" data-avatar="img/cat.png" alt="Gato">
+                    <img src="img/dog.png" class="avatar-opcao" data-avatar="img/dog.png" alt="Cão">
+                    <img src="img/cat (1).png" class="avatar-opcao" data-avatar="img/cat (1).png" alt="Gato">
+                    <img src="img/dog (1).png" class="avatar-opcao" data-avatar="img/dog (1).png" alt="Cão">   
+                    <img src="img/dog-face.png" class="avatar-opcao" data-avatar="img/dog-face.png" alt="Cão"> 
+                    <img src="img/siberian-husky.png" class="avatar-opcao" data-avatar="img/siberian-husky.png" alt="Cão">
+                    <img src="img/pets.png" class="avatar-opcao" data-avatar="img/pets.png" alt="Pets">
+                    <img src="img/cat_1.png" class="avatar-opcao" data-avatar="img/cat_1.png" alt="Gato">
+                </div>
+            </div>
+
+            <form id="form-editar-perfil" action="EditarPerfilServlet" method="post">
+                <div class="form-group">
+                    <label>Nome Completo</label>
+                    <input type="text" name="nome" placeholder="Seu nome" required>
+                </div>
+                <div class="form-group">
+                    <label>Telefone</label>
+                    <input type="tel" name="telefone" placeholder="(99) 99999-9999" required>
+                </div>
+                
+                <button type="submit" class="btn-primary" style="margin-top: 15px;">Salvar Alterações</button>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('sucesso') === 'true') {
+            localStorage.setItem("usuarioLogado", "true");
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
+
+        const btnEntrar = document.getElementById("btn-entrar");
+        const wrapperUsuario = document.getElementById("wrapper-usuario");
+        const dropdownMenu = document.getElementById("user-dropdown");
+        const btnLogout = document.getElementById("btn-logout");
+        
+        const modal = document.getElementById("modal-perfil");
+        const btnAbrirPerfil = document.getElementById("abrir-perfil");
+        const btnFecharModal = document.getElementById("fechar-modal");
+        
+        const fotoNavbar = document.getElementById("usuario");
+        const opcoesAvatar = document.querySelectorAll(".avatar-opcao");
+        const formEditarPerfil = document.getElementById("form-editar-perfil");
+        
+        // Carrega o avatar previamente salvo
+        const avatarSalvo = localStorage.getItem("avatarUsuario");
+        if (avatarSalvo) {
+            fotoNavbar.src = avatarSalvo; 
+            opcoesAvatar.forEach(img => {
+                if (img.getAttribute("data-avatar") === avatarSalvo) {
+                    img.classList.add("selecionado");
+                } else {
+                    img.classList.remove("selecionado");
+                }
+            });
+        }
+
+        // Troca de avatares interativa
+        opcoesAvatar.forEach(avatar => {
+            avatar.addEventListener("click", () => {
+                opcoesAvatar.forEach(img => img.classList.remove("selecionado"));
+                avatar.classList.add("selecionado");
+                
+                const novoCaminho = avatar.getAttribute("data-avatar");       
+                fotoNavbar.src = novoCaminho || novoCaminho; // Fallback de garantia       
+                localStorage.setItem("avatarUsuario", novoCaminho);
+            });
+        });
+        
+        // Controle do Modal
+        btnAbrirPerfil.addEventListener("click", (event) => {
+            event.preventDefault();
+            modal.classList.remove("hidden");
+            dropdownMenu.classList.add("hidden");
+        });
+        
+        btnFecharModal.addEventListener("click", () => {
+            modal.classList.add("hidden");
+        });
+        
+        modal.addEventListener("click", (event) => {
+            if (event.target === modal) {
+                modal.classList.add("hidden");
+            }
+        });
+
+        // Estado Logado vs Deslogado da Navbar
+        const estaLogado = localStorage.getItem("usuarioLogado");
+        const nomeUsuarioNav = document.getElementById("nome-usuario-nav");
+        if (estaLogado === "true") {
+            btnEntrar.classList.add("hidden");
+            wrapperUsuario.classList.remove("hidden");
+            const nomeSalvo = localStorage.getItem("nomeUsuario") || "Tutor";
+            nomeUsuarioNav.textContent = nomeSalvo;
+            
+            if (formEditarPerfil) {
+        formEditarPerfil.querySelector('input[name="nome"]').value = localStorage.getItem("nomeUsuario") || "";
+        formEditarPerfil.querySelector('input[name="telefone"]').value = localStorage.getItem("telefoneUsuario") || "";
+        }
+        } else {
+            btnEntrar.classList.remove("hidden");
+            wrapperUsuario.classList.add("hidden");
+        }
+
+        // Gatilho do Dropdown
+        const usuarioGatilho = document.getElementById("usuario-gatilho");
+        usuarioGatilho.addEventListener("click", (event) => {
+            event.stopPropagation();
+            dropdownMenu.classList.toggle("hidden");
+        });
+
+        document.addEventListener("click", () => {
+            if (!dropdownMenu.classList.contains("hidden")) {
+                dropdownMenu.classList.add("hidden");
+            }
+        });
+
+        // Ação de Logout
+        btnLogout.addEventListener("click", (event) => {
+            event.preventDefault();
+            localStorage.removeItem("usuarioLogado");
+            window.location.reload();
+        });
+        
+        // Envio do formulário sem recarregar a tela
+        if (formEditarPerfil) {
+            formEditarPerfil.addEventListener("submit", (event) => {
+                event.preventDefault();
+
+                const nomeDigitado = formEditarPerfil.querySelector('input[name="nome"]').value;
+                const telefoneDigitado = formEditarPerfil.querySelector('input[name="telefone"]').value;
+                localStorage.setItem("nomeUsuario", nomeDigitado);
+                localStorage.setItem("telefoneUsuario", telefoneDigitado);
+                nomeUsuarioNav.textContent = nomeDigitado;
+
+                const formData = new FormData(formEditarPerfil);
+                fetch('EditarPerfilServlet', {
+                    method: 'POST',
+                    body: new URLSearchParams(formData)
+                })
+                .then(response => {
+                    if(response.ok) {
+                        console.log("Perfil atualizado no servidor.");
+                    }
+                })
+                .catch(error => console.error("Erro ao sincronizar com o servidor:", error));
+
+                alert("Alterações salvas com sucesso!");
+                modal.classList.add("hidden");
+            });
+        }
+    });
+    </script>
+</body>
+</html>
