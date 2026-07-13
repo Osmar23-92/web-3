@@ -1,0 +1,7 @@
+-- Criando tabela
+CREATE TABLE paises_tb(
+ id_pais INT PRIMARY KEY AUTO_INCREMENT,
+ nome_pais VARCHAR(50) NOT NULL,
+ titulos_pais TINYINT DEFAULT 0
+);
+
