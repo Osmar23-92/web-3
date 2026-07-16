@@ -12,6 +12,27 @@
             background-color: #e7f1ff !important;
             transform: scale(1.02);
         }
+        /* Garante que os cards gerados dinamicamente mostrem a mãozinha ao passar o mouse */
+        #container-pacientes .card {
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        /* Estilo para botões de exclusão de perfil */
+        .btn-danger {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            transition: background 0.3s;
+            margin-top: 15px;
+        }
+        .btn-danger:hover {
+            background-color: #bd2130;
+        }
     </style>
 </head>
 <body>
@@ -27,10 +48,29 @@
     </header>
 
     <main>
-        <h2 style="margin-bottom: 30px; color: #0056b3;">Marcar Consulta</h2>
+        <h2 id="titulo-pagina" style="margin-bottom: 30px; color: #0056b3;">Marcar Consulta</h2>
         
         <section style="margin-bottom: 40px;">
             <h3>1. Escolha o Paciente (Pet)</h3>
+            
+            <!-- Este container receberá os cards dos pets cadastrados via JavaScript -->
+            <div class="grid-container" id="container-pacientes">
+                <!-- Pets aparecerão aqui dinamicamente -->
+            </div>
+
+            <!-- Botão de Excluir Perfil que aparece dinamicamente após selecionar um pet -->
+            <div style="margin-top: 15px;">
+                <button id="btn-excluir-pet" class="btn-danger hidden">Excluir Perfil do Pet Selecionado</button>
+            </div>
+
+            <!-- Mensagem de aviso caso nenhum pet esteja cadastrado -->
+            <div id="aviso-sem-pets" class="info-lateral hidden" style="margin-top: 15px; text-align: center;">
+                <p style="margin-bottom: 15px;">Você ainda não cadastrou nenhum pet!</p>
+                <a href="cadastro_pet.html" class="btn-primary" style="text-decoration: none; display: inline-block;">Cadastrar meu primeiro Pet</a>
+            </div>
+
+            <!-- Campo oculto para enviar o ID/Nome do pet selecionado -->
+            <input type="hidden" id="pet-selecionado-agendamento" name="pet_selecionado">
         </section>
 
         <section style="margin-bottom: 40px;">
@@ -46,8 +86,16 @@
 
         <section style="margin-bottom: 40px;">
             <h3>3. Escolha a Data e Horário</h3>
-            <div class="form-group" style="max-width: 300px; margin-top: 15px;">
-                <input type="date" id="input-data" name="data_consulta">
+            <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-top: 15px;">
+                <div class="form-group" style="max-width: 200px;">
+                    <label for="input-data" style="font-weight: bold; display: block; margin-bottom: 5px;">Data</label>
+                    <input type="date" id="input-data" name="data_consulta">
+                </div>
+                <!-- NOVO CAMPO: Horário da Consulta -->
+                <div class="form-group" style="max-width: 150px;">
+                    <label for="input-hora" style="font-weight: bold; display: block; margin-bottom: 5px;">Horário</label>
+                    <input type="time" id="input-hora" name="hora_consulta">
+                </div>
             </div>
         </section>
 
@@ -74,20 +122,124 @@
 
     <script>
     document.addEventListener("DOMContentLoaded", () => {
+        // Elementos da interface
         const cardsArea = document.querySelectorAll(".card-area");
-        const cardVacinacao = document.getElementById("card-vacinacao");
         const modalVacinas = document.getElementById("modal-vacinas");
         const btnFecharModal = document.getElementById("fechar-modal-vacinas");
         const btnConfirmarVacinas = document.getElementById("btn-confirmar-vacinas");
         const opcoesVacina = document.querySelectorAll(".vacina-opcao");
         const textoSelecionadas = document.getElementById("vacinas-selecionadas-texto");
         const inputData = document.getElementById("input-data");
+        const inputHora = document.getElementById("input-hora");
         const btnConfirmarAgendamento = document.getElementById("btn-confirmar-agendamento");
+        const btnExcluirPet = document.getElementById("btn-excluir-pet");
+        const tituloPagina = document.getElementById("titulo-pagina");
 
+        // Elementos do Pet
+        const containerPacientes = document.getElementById("container-pacientes");
+        const avisoSemPets = document.getElementById("aviso-sem-pets");
+        const inputPetOculto = document.getElementById("pet-selecionado-agendamento");
+
+        // Estados do formulário
         let areasSelecionadas = []; 
         let vacinasSelecionadas = [];
+        let petSelecionado = null; 
+        let idConsultaEdicao = null; // Guardará o ID caso esteja editando uma consulta
 
-        // 1. Permite selecionar múltiplos Cards de Área sem desmarcar
+        // Verifica na URL se é uma operação de EDIÇÃO de consulta (ex: ?editar=1234567)
+        const params = new URLSearchParams(window.location.search);
+        if (params.has("editar")) {
+            idConsultaEdicao = params.get("editar");
+            tituloPagina.textContent = "Editar Consulta";
+            btnConfirmarAgendamento.textContent = "Salvar Alterações";
+        }
+
+        // ==========================================================================
+        // 0. CARREGAR E EXIBIR OS PETS CADASTRADOS (Dinâmico)
+        // ==========================================================================
+        function renderizarPets() {
+            const listaPets = JSON.parse(localStorage.getItem("guaipet_perfis")) || [];
+
+            if (listaPets.length === 0) {
+                if (avisoSemPets) avisoSemPets.classList.remove("hidden");
+                containerPacientes.innerHTML = "";
+                btnExcluirPet.classList.add("hidden");
+            } else {
+                if (avisoSemPets) avisoSemPets.classList.add("hidden");
+                
+                containerPacientes.innerHTML = ""; // Limpa antes de renderizar
+                listaPets.forEach(pet => {
+                    const card = document.createElement("div");
+                    card.className = "card"; 
+                    card.setAttribute("data-nome", pet.nome);
+                    
+                    card.innerHTML = `
+                        <img src="${pet.foto || 'img/dog.png'}" alt="${pet.nome}" class="avatar-opcao" style="width: 70px; height: 70px; border-radius: 50%; object-fit: cover; margin-bottom: 8px; pointer-events: none;">
+                        <h4 style="margin: 5px 0 2px 0; pointer-events: none;">${pet.nome}</h4>
+                        <p style="font-size: 12px; color: #777; pointer-events: none;">${pet.raca} (${pet.especie})</p>
+                    `;
+
+                    // Evento para selecionar o paciente
+                    card.addEventListener("click", () => {
+                        selecionarPetCard(card, pet.nome);
+                    });
+
+                    containerPacientes.appendChild(card);
+                });
+            }
+        }
+
+        function selecionarPetCard(card, nomePet) {
+            const todosOsPetCards = containerPacientes.querySelectorAll(".card");
+            todosOsPetCards.forEach(c => c.classList.remove("ativo"));
+
+            card.classList.add("ativo");
+            petSelecionado = nomePet; 
+            
+            if (inputPetOculto) {
+                inputPetOculto.value = nomePet;
+            }
+
+            // Exibe o botão de exclusão do pet selecionado
+            btnExcluirPet.classList.remove("hidden");
+        }
+
+        // ==========================================================================
+        // EXCLUSÃO DO PERFIL DO PET E SUAS CONSULTAS
+        // ==========================================================================
+        btnExcluirPet.addEventListener('click', () => {
+            if (!petSelecionado) {
+                alert("Nenhum pet selecionado para exclusão.");
+                return;
+            }
+
+            if (confirm(`Tem certeza de que deseja excluir permanentemente o perfil de "${petSelecionado}" e todas as suas consultas agendadas?`)) {
+                excluirPet(petSelecionado);
+            }
+        });
+
+        function excluirPet(nomePet) {
+            // 1. Remove do cadastro de perfis do localStorage
+            let pets = JSON.parse(localStorage.getItem('guaipet_perfis')) || [];
+            pets = pets.filter(pet => pet.nome !== nomePet);
+            localStorage.setItem('guaipet_perfis', JSON.stringify(pets));
+
+            // 2. Remove consultas associadas a este pet
+            let consultas = JSON.parse(localStorage.getItem('lista_consultas')) || [];
+            consultas = consultas.filter(consulta => consulta.pet !== nomePet);
+            localStorage.setItem('lista_consultas', JSON.stringify(consultas));
+
+            alert(`Perfil de "${nomePet}" e seus agendamentos foram excluídos.`);
+            
+            // 3. Reseta estados e renderiza novamente a tela
+            petSelecionado = null;
+            if (inputPetOculto) inputPetOculto.value = "";
+            renderizarPets();
+        }
+
+        // ==========================================================================
+        // 1. Selecionar múltiplos Cards de Área
+        // ==========================================================================
         cardsArea.forEach(card => {
             card.addEventListener("click", () => {
                 const area = card.getAttribute("data-area");
@@ -99,11 +251,7 @@
                     if (area === "Vacinação") {
                         vacinasSelecionadas = [];
                         textoSelecionadas.textContent = "";
-                        opcoesVacina.forEach(opcao => {
-                            opcao.classList.remove("selecionado");
-                            opcao.style.borderColor = "#ccc";
-                            opcao.style.background = "none";
-                        });
+                        opcesResetVacinas();
                     }
                 } else {
                     card.classList.add("ativo");
@@ -116,14 +264,34 @@
             });
         });
 
-        // 2. Fechar o modal de vacinas
-        btnFecharModal.addEventListener("click", () => modalVacinas.classList.add("hidden"));
-        modalVacinas.addEventListener("click", (e) => { if (e.target === modalVacinas) modalVacinas.classList.add("hidden"); });
+        function opcesResetVacinas() {
+            opcoesVacina.forEach(opcao => {
+                opcao.classList.remove("selecionado");
+                opcao.style.borderColor = "#ccc";
+                opcao.style.background = "none";
+            });
+        }
 
+        // ==========================================================================
+        // 2. Fechar o modal de vacinas
+        // ==========================================================================
+        if (btnFecharModal) {
+            btnFecharModal.addEventListener("click", () => modalVacinas.classList.add("hidden"));
+        }
+        if (modalVacinas) {
+            modalVacinas.addEventListener("click", (e) => { 
+                if (e.target === modalVacinas) modalVacinas.classList.add("hidden"); 
+            });
+        }
+
+        // ==========================================================================
         // 3. Seleção das vacinas dentro do modal
+        // ==========================================================================
         opcoesVacina.forEach(opcao => {
-            opcao.addEventListener("click", () => {
+            opcao.addEventListener("click", (e) => {
+                e.stopPropagation(); // Evita interferência de bolha de eventos
                 const nomeVacina = opcao.getAttribute("data-vacina");
+                
                 if (opcao.classList.contains("selecionado")) {
                     opcao.classList.remove("selecionado");
                     opcao.style.borderColor = "#ccc";
@@ -139,51 +307,139 @@
         });
 
         // Confirmar vacinas dentro do modal
-        btnConfirmarVacinas.addEventListener("click", () => {
-            modalVacinas.classList.add("hidden");
+        if (btnConfirmarVacinas) {
+            btnConfirmarVacinas.addEventListener("click", () => {
+                modalVacinas.classList.add("hidden");
+                atualizarTextoVacinas();
+            });
+        }
+
+        function atualizarTextoVacinas() {
             if (vacinasSelecionadas.length > 0) {
-                textoSelecionadas.textContent = "Vacinas: " + vacinasSelecionadas.join(", ");
+                textoSelecionadas.textContent = "Vacinas selecionadas: " + vacinasSelecionadas.join(", ");
+            } else {
+                textoSelecionadas.textContent = "";
             }
-        });
+        }
 
-        // 4. Salva a consulta atual na lista geral sem sobrescrever histórico
-        btnConfirmarAgendamento.addEventListener("click", () => {
-            const dataEscolhida = inputData.value;
+        // Inicializa a renderização de pets cadastrados
+        renderizarPets();
 
-            if (areasSelecionadas.length === 0) {
-                alert("Por favor, selecione ao menos uma área (Checkup, Vacinação, etc.) antes de continuar.");
-                return;
+        // ==========================================================================
+        // CARREGAR DADOS SE ESTIVER EM MODO EDIÇÃO
+        // ==========================================================================
+        if (idConsultaEdicao) {
+            const consultas = JSON.parse(localStorage.getItem("lista_consultas")) || [];
+            const consultaParaEditar = consultas.find(c => c.id.toString() === idConsultaEdicao);
+
+            if (consultaParaEditar) {
+                // 1. Seleciona o pet correspondente na interface
+                const cardPet = Array.from(containerPacientes.querySelectorAll(".card"))
+                                     .find(c => c.getAttribute("data-nome") === consultaParaEditar.pet);
+                if (cardPet) {
+                    selecionarPetCard(cardPet, consultaParaEditar.pet);
+                }
+
+                // 2. Ativa as áreas médicas salvas
+                const areasSalvas = consultaParaEditar.area.split(", ");
+                areasSelecionadas = [...areasSalvas];
+                cardsArea.forEach(card => {
+                    const areaVal = card.getAttribute("data-area");
+                    if (areasSalvas.includes(areaVal)) {
+                        card.classList.add("ativo");
+                    }
+                });
+
+                // 3. Restaura vacinas se houver
+                if (consultaParaEditar.vacinas && consultaParaEditar.vacinas !== "Nenhuma") {
+                    const vacinasSalvas = consultaParaEditar.vacinas.split(", ");
+                    vacinasSelecionadas = [...vacinasSalvas];
+                    opcoesVacina.forEach(opcao => {
+                        const vacinaVal = opcao.getAttribute("data-vacina");
+                        if (vacinasSalvas.includes(vacinaVal)) {
+                            opcao.classList.add("selecionado");
+                            opcao.style.borderColor = "#0056b3";
+                            opcao.style.background = "#e7f1ff";
+                        }
+                    });
+                    atualizarTextoVacinas();
+                }
+
+                // 4. Preenche Data e Hora
+                if (inputData) inputData.value = consultaParaEditar.data;
+                if (inputHora && consultaParaEditar.hora) inputHora.value = consultaParaEditar.hora;
             }
-            if (areasSelecionadas.includes("Vacinação") && vacinasSelecionadas.length === 0) {
-                alert("Você escolheu Vacinação, por favor abra o card e selecione ao menos uma vacina.");
-                modalVacinas.classList.remove("hidden");
-                return;
-            }
-            if (!dataEscolhida) {
-                alert("Por favor, escolha uma data para a consulta.");
-                return;
-            }
-            
-            // Criamos o objeto estruturado com ID exclusivo
-            const novoAgendamento = {
-                id: Date.now(), 
-                area: areasSelecionadas.join(", "),
-                vacinas: vacinasSelecionadas.join(", "),
-                data: dataEscolhida
-            };
-            
-            // Carrega a lista atual do navegador ou inicia uma vazia se for a primeira vez
-            let consultasSalvas = JSON.parse(localStorage.getItem("lista_consultas")) || [];
+        }
 
-            // Adiciona o agendamento atual no final da lista antiga
-            consultasSalvas.push(novoAgendamento);
-            
-            // Atualiza de vez o banco local com a lista inteira modificada
-            localStorage.setItem("lista_consultas", JSON.stringify(consultasSalvas));
+        // ==========================================================================
+        // 4. Confirmar e Salvar o Agendamento (Gravação ou Atualização)
+        // ==========================================================================
+        if (btnConfirmarAgendamento) {
+            btnConfirmarAgendamento.addEventListener("click", (e) => {
+                e.preventDefault(); 
+                
+                const dataEscolhida = inputData ? inputData.value : "";
+                const horaEscolhida = inputHora ? inputHora.value : "";
 
-            // Redireciona o usuário para conferir o histórico
-            window.location.href = "consultas.html";
-        });
+                // VALIDAÇÕES
+                if (!petSelecionado) {
+                    alert("Por favor, selecione o Paciente (Pet) na Etapa 1 antes de continuar.");
+                    return;
+                }
+                if (areasSelecionadas.length === 0) {
+                    alert("Por favor, selecione ao menos uma área (Checkup, Vacinação, etc.) antes de continuar.");
+                    return;
+                }
+                if (areasSelecionadas.includes("Vacinação") && vacinasSelecionadas.length === 0) {
+                    alert("Você escolheu Vacinação! Por favor selecione ao menos uma vacina no painel de vacinas.");
+                    modalVacinas.classList.remove("hidden");
+                    return;
+                }
+                if (!dataEscolhida) {
+                    alert("Por favor, escolha uma data para a consulta.");
+                    return;
+                }
+                if (!horaEscolhida) {
+                    alert("Por favor, escolha um horário para a consulta.");
+                    return;
+                }
+                
+                let consultasSalvas = JSON.parse(localStorage.getItem("lista_consultas")) || [];
+
+                if (idConsultaEdicao) {
+                    // --- MODO EDIÇÃO ---
+                    const index = consultasSalvas.findIndex(c => c.id.toString() === idConsultaEdicao);
+                    if (index !== -1) {
+                        consultasSalvas[index].pet = petSelecionado;
+                        consultasSalvas[index].area = areasSelecionadas.join(", ");
+                        consultasSalvas[index].vacinas = vacinasSelecionadas.length > 0 ? vacinasSelecionadas.join(", ") : "Nenhuma";
+                        consultasSalvas[index].data = dataEscolhida;
+                        consultasSalvas[index].hora = horaEscolhida; // Salva o novo horário alterado
+                    }
+                    alert("Consulta atualizada com sucesso!");
+                } else {
+                    // --- MODO NOVO AGENDAMENTO ---
+                    const novoAgendamento = {
+                        id: Date.now(), 
+                        pet: petSelecionado, 
+                        area: areasSelecionadas.join(", "),
+                        vacinas: vacinasSelecionadas.length > 0 ? vacinasSelecionadas.join(", ") : "Nenhuma",
+                        data: dataEscolhida,
+                        hora: horaEscolhida // Salva o horário inserido
+                    };
+                    consultasSalvas.push(novoAgendamento);
+                    alert("Agendamento para " + petSelecionado + " realizado com sucesso!");
+                }
+                
+                try {
+                    localStorage.setItem("lista_consultas", JSON.stringify(consultasSalvas));
+                    window.location.href = "consultas.html";
+                } catch (error) {
+                    console.error("Erro ao salvar no localStorage:", error);
+                    alert("Ocorreu um erro ao salvar o agendamento. Tente novamente.");
+                }
+            });
+        }
     });
     </script>
 </body>

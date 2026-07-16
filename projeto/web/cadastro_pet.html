@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Guaipet - Meus pets</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" href="img/guaipet.jpeg"/>
+    
+    <!-- Correção 1: Importando o Font Awesome para os ícones funcionarem -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div>
+                <a href="index.html"><img src="img/guaipet.jpeg" alt="Logo" id="logo"></a>
+            </div>
+            <ul class="nav-links">
+                <li><a href="agendamento.html">Novo Agendamento</a></li>
+            </ul>
+        </nav>
+    </header>
+        
+    <!-- Espaçamento extra opcional se o form ficar colado no topo devido ao header sticky -->
+    <main style="padding-top: 20px;">
+        <div class="form-container">
+            <h2><i class="fa-solid fa-paw"></i> Cadastrar Novo Pet</h2>
+            <p class="form-subtitle">Adicione as informações do pet ao seu perfil da Guaipet</p>
+
+            <form id="cadastro-pet-form">
+                <!-- Avatar Config -->
+                <div class="pet-avatar-container">
+                    <div class="pet-avatar-preview">
+                        <!-- Correção 2: Iniciando o preview com a imagem do cachorro (ou padrão) para evitar imagem quebrada -->
+                        <img id="pet-preview-img" src="img/dog.png" alt="Preview">
+                    </div>
+                    <!-- Seleção rápida de avatares -->
+                    <div class="pet-avatar-options">
+                        <img src="img/dog.png" class="avatar-opcao pet-selecionado" onclick="selecionarAvatar(this)">
+                        <img src="img/cat.png" class="avatar-opcao" onclick="selecionarAvatar(this)">
+                        <img src="img/eagle.png" class="avatar-opcao" onclick="selecionarAvatar(this)">
+                        <img src="img/bunny.png" class="avatar-opcao" onclick="selecionarAvatar(this)">
+                    </div>
+                </div>
+
+                <!-- Nome -->
+                <div class="form-group">
+                    <label for="nome-pet">Nome do Pet</label>
+                    <input type="text" id="nome-pet" required placeholder="Ex: Bob">
+                </div>
+
+                <!-- Espécie e Idade Lado a Lado -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="especie-pet">Espécie</label>
+                        <select id="especie-pet" required>
+                            <option value="cachorro">Cachorro</option>
+                            <option value="gato">Gato</option>
+                            <option value="Pássaro">Pássaro</option>
+                            <option value="Coelho">Coelho</option>
+                            <option value="outro">Outro</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="idade-pet">Idade (Anos)</label>
+                        <input type="number" id="idade-pet" min="0" placeholder="Ex: 3">
+                    </div>
+                </div>
+
+                <!-- Raça -->
+                <div class="form-group">
+                    <label for="raca-pet">Raça</label>
+                    <input type="text" id="raca-pet" placeholder="Ex: Labrador, SRD">
+                </div>
+
+                <!-- Botão Principal -->
+                <button type="submit" class="btn-primary btn-pet-primary">Salvar Pet</button>
+            </form>
+        </div>
+    </main>
+
+    <!-- Correção 3: Script para fazer a troca do avatar funcionar e simular o salvamento -->
+    <script>
+        function selecionarAvatar(elementoClicado) {
+    const opcoes = document.querySelectorAll('.avatar-opcao');
+    opcoes.forEach(opcao => opcao.classList.remove('pet-selecionado'));
+
+    elementoClicado.classList.add('pet-selecionado');
+
+    const previewImg = document.getElementById('pet-preview-img');
+    previewImg.src = elementoClicado.src;
+}
+
+document.getElementById('cadastro-pet-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const nome = document.getElementById('nome-pet').value;
+    const especie = document.getElementById('especie-pet').value;
+    const idade = document.getElementById('idade-pet').value;
+    const raca = document.getElementById('raca-pet').value;
+    const foto = document.getElementById('pet-preview-img').src;
+
+    // 1. Cria o objeto do novo pet
+    const novoPet = { nome, especie, idade, raca, foto };
+
+    // 2. Busca a lista de pets já existente ou cria uma vazia
+    let listaPets = JSON.parse(localStorage.getItem('guaipet_perfis')) || [];
+
+    // 3. Adiciona o novo pet à lista
+    listaPets.push(novoPet);
+
+    // 4. Salva a lista de volta no localStorage do navegador
+    localStorage.setItem('guaipet_perfis', JSON.stringify(listaPets));
+
+    alert('Perfil de ' + nome + ' adicionado com sucesso!');
+    
+    // Redireciona o tutor direto para a página de agendamento!
+    window.location.href = 'agendamento.html';
+});
+    </script>
+</body>
+</html>

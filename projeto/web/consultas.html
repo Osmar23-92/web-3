@@ -14,6 +14,7 @@
                 <a href="index.html"><img src="img/guaipet.jpeg" alt="Logo" id="logo"></a>
             </div>
             <ul class="nav-links">
+                <!-- Ajustado o link para apontar para marcar-consulta.html, que é onde o fluxo acontece -->
                 <li><a href="agendamento.html">Novo Agendamento</a></li>
             </ul>
         </nav>
@@ -33,7 +34,7 @@
     document.addEventListener("DOMContentLoaded", () => {
         const blocoSemConsultas = document.getElementById("sem-consultas");
         const listaConsultas = document.getElementById("lista-consultas");
-
+        
         // 1. Puxa a lista completa de consultas do localStorage
         let consultasSalvas = JSON.parse(localStorage.getItem("lista_consultas")) || [];
 
@@ -46,6 +47,7 @@
             // Percorre cada consulta salva e cria o HTML dela
             consultasSalvas.forEach(consulta => {
                 const dataFormatada = consulta.data.split("-").reverse().join("/");
+                const horaFormatada = consulta.hora ? consulta.hora : "--:--";
                 
                 let servicoExibido = consulta.area;
                 if (consulta.area.includes("Vacinação") && consulta.vacinas) {
@@ -53,20 +55,34 @@
                     servicoExibido = servicoExibido.replace("Vacinação", `Vacinação (${consulta.vacinas})`);
                 }
 
+                // Cria o link dinâmico de edição usando o ID desta consulta específica
+                const linkEdicao = `agendamento.html?editar=${consulta.id}`;
+
                 const cardConsulta = document.createElement("div");
                 cardConsulta.className = "card";
                 cardConsulta.style.borderLeft = "6px solid #0056b3";
                 cardConsulta.style.padding = "20px";
                 cardConsulta.style.background = "#fff";
                 cardConsulta.style.marginBottom = "15px";
+                cardConsulta.style.borderRadius = "8px";
+                cardConsulta.style.boxShadow = "0 2px 5px rgba(0,0,0,0.1)";
                 
                 cardConsulta.innerHTML = `
-                    <h3 style="color: #0056b3; margin-top: 0;">Procedimento: ${servicoExibido}</h3>
-                    <p><strong>Data:</strong> ${dataFormatada}</p>
-                    <p><strong>Status:</strong> <span style="color: #28a745; font-weight: bold;">Confirmado</span></p>
-                    <button class="btn-cancelar" data-id="${consulta.id}" style="background: #dc3545; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; margin-top: 10px;">
-                        Cancelar Agendamento
-                    </button>
+                    <h3 style="color: #0056b3; margin-top: 0; margin-bottom: 10px;">Procedimento: ${servicoExibido}</h3>
+                    <p style="margin: 5px 0;"><strong>Paciente (Pet):</strong> ${consulta.pet}</p>
+                    <p style="margin: 5px 0;"><strong>Data:</strong> ${dataFormatada} às ${horaFormatada}</p>
+                    <p style="margin: 5px 0;"><strong>Status:</strong> <span style="color: #28a745; font-weight: bold;">Confirmado</span></p>
+                    
+                    <div style="display: flex; gap: 10px; margin-top: 15px;">
+                        <!-- Botão de Editar -->
+                        <a href="${linkEdicao}" class="btn-editar" style="background: #ffc107; color: #212529; text-decoration: none; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 14px; display: inline-block;">
+                            Editar Agendamento
+                        </a>
+                        <!-- Botão de Cancelar -->
+                        <button class="btn-cancelar" data-id="${consulta.id}" style="background: #dc3545; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 14px;">
+                            Cancelar Agendamento
+                        </button>
+                    </div>
                 `;
 
                 listaConsultas.appendChild(cardConsulta);
