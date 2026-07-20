@@ -9,7 +9,9 @@ public class Usuario {
     
     public Usuario(){}
 
-    public Usuario(String nomeUsuario, String senhaUsuario) {
+    public Usuario(
+            String nomeUsuario,
+            String senhaUsuario) {
         this.nomeUsuario = nomeUsuario;
         this.senhaUsuario = senhaUsuario;
     }

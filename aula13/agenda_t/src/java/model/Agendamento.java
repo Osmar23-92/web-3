@@ -1,17 +1,23 @@
 package model;
 
+import java.util.Date;
+
 
 public class Agendamento {
     private int idAgendamento;
-    private int idUsuario;
-    private String dataAgendamento;
+    private Usuario usuario;
+    private Date dataAgendamento;
     private String descAgendamento;
     
     public Agendamento(){}
 
-    public Agendamento(int idAgendamento, int idUsuario, String dataAgendamento, String descAgendamento) {
+    public Agendamento(
+            int idAgendamento,
+            Usuario usuario,
+            Date dataAgendamento,
+            String descAgendamento) {
         this.idAgendamento = idAgendamento;
-        this.idUsuario = idUsuario;
+        this.usuario = usuario;
         this.dataAgendamento = dataAgendamento;
         this.descAgendamento = descAgendamento;
     }
@@ -24,19 +30,19 @@ public class Agendamento {
         this.idAgendamento = idAgendamento;
     }
 
-    public int getIdUsuario() {
-        return idUsuario;
+    public Usuario getUsuario() {
+        return usuario;
     }
 
-    public void setIdUsuario(int idUsuario) {
-        this.idUsuario = idUsuario;
+    public void setUsuario(Usuario usuario) {
+        this.usuario = usuario;
     }
 
-    public String getDataAgendamento() {
+    public Date getDataAgendamento() {
         return dataAgendamento;
     }
 
-    public void setDataAgendamento(String dataAgendamento) {
+    public void setDataAgendamento(Date dataAgendamento) {
         this.dataAgendamento = dataAgendamento;
     }
 
@@ -52,7 +58,7 @@ public class Agendamento {
     public String toString() {
         return "Agendamento{" +
                 "idAgendamento=" + idAgendamento +
-                ", idUsuario=" + idUsuario +
+                ", usuario=" + usuario +
                 ", dataAgendamento=" + dataAgendamento +
                 ", descAgendamento=" + descAgendamento +
                 '}';
@@ -60,3 +66,5 @@ public class Agendamento {
     
     
 }
+    
+    
